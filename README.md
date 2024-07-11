@@ -1,6 +1,6 @@
 # PerCell ChIP-seq Pipeline
 <br>
-<img src="https://github.com/lextallan/PerCell/blob/master/subway.png" width="1250">
+<img src="https://github.com/lextallan/PerCell/blob/main/subway.png" width="1250">
 <br>
 
 ***PerCell ChIP-seq assays and their analysis using our pipeline are expected to generate similar qualitative readouts of protein:DNA interactions or histone modification localization to conventional ChIP-seq workflows, while additionally providing relative quantifications for these data across distinct replicates, lab groups, cellular treatment conditions, and genetic backgrounds.***
