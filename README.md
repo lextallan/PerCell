@@ -186,6 +186,8 @@ ________________________________________
 
 ### Citations and Acknowledgements
 
+[![DOI](https://zenodo.org/badge/827446696.svg)](https://zenodo.org/doi/10.5281/zenodo.12730196)
+
 A full list of references for software tools used within this pipeline can be found in the accompanying manuscript.
 
 This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/master/LICENSE).
