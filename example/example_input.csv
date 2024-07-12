@@ -1,0 +1,5 @@
+sample,fastq_1,fastq_2,antibody,control
+MYOD_1,./example/read5.fq.gz,./example/read6.fq.gz,MYOD,Input_1
+MYOD_2,./example/read7.fq.gz,./example/read8.fq.gz,MYOD,Input_2
+Input_1,./example/read1.fq.gz,./example/read2.fq.gz,,
+Input_2,./example/read3.fq.gz,./example/read4.fq.gz,,

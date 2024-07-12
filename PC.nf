@@ -8,7 +8,6 @@ nextflow.enable.dsl=2
 // import modules
 include { INPUT_CHECK } from './modules/local/input_check.nf'
 include { generate_whitelist as whitelist_experimental ; generate_whitelist as whitelist_spikein } from './modules/local/generate_whitelist.nf'
-include { CUSTOM_GETCHROMSIZES } from './modules/nf-core/modules/custom/getchromsizes/main.nf'
 include { FASTQC_TRIMGALORE } from './modules/local/fastqc_trimgalore.nf'
 include { BOWTIE2_BUILD as BOWTIE2_BUILD_EXPERIMENTAL ; BOWTIE2_BUILD as BOWTIE2_BUILD_SPIKEIN } from './modules/nf-core/modules/bowtie2/build/main.nf'
 include { CHROMAP_INDEX as CHROMAP_INDEX_EXPERIMENTAL ; CHROMAP_INDEX as CHROMAP_INDEX_SPIKEIN } from './modules/nf-core/modules/chromap/index/main.nf'
@@ -43,13 +42,19 @@ workflow {
         params.skip_trimming
     )
 
-    // Setting up channels based on parameter selections for experimental and spike-in genomes. Create index for chosen aligner if not supplied. 
+    // Setting up channels based on parameter selections for experimental and spike-in genomes.
     ch_experimental_fa = Channel.empty()
     ch_spikein_fa = Channel.empty()
     ch_experimental_bowtie2_index = Channel.empty()
     ch_experimental_chro_index = Channel.empty()
     ch_spikein_bowtie2_index = Channel.empty()
     ch_spikein_chro_index = Channel.empty()
+    ch_experimental_gtf = Channel.empty()
+    ch_experimental_blacklist = Channel.empty()
+    ch_spikein_blacklist = Channel.empty()
+    ch_macs_gsize = Channel.empty()
+
+    // Create index for chosen aligner if not supplied and set up channels for experimental and spike-in genomes
     if (params.experimental == 'human') {
         ch_experimental_fa = params.human_fa
         if (params.aligner == 'chromap') {
@@ -267,10 +272,6 @@ workflow {
         }
         ch_spikein_blacklist = params.fly_blacklist
     }
-
-    CUSTOM_GETCHROMSIZES (
-        ch_experimental_fa
-    )
 
     whitelist_experimental (
         ch_experimental_fa,
@@ -619,7 +620,7 @@ workflow {
 
     macs2_bdgcmp (
         macs2_peakcalling.out.chip_ctrl_bdg,
-        CUSTOM_GETCHROMSIZES.out.sizes,
+        whitelist_experimental.out.sizes,
         params.macs2_bigwig_method
     )
 
