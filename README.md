@@ -12,7 +12,7 @@ ________________________________________
 
 **<ins>Required Hardware:</ins>**
 
-- Computer with Unix-based operating system
+- Computer with Linux/Unix-based operating system
 
 - A computer cluster or cloud-based computing platform for executing the pipeline (currently the pipeline is tested for compatibility with SLURM-managed platforms)
 
