@@ -13,6 +13,7 @@ process generate_whitelist {
 
     output:
     path '*.bed', emit: whitelist
+    path '*.sizes', emit: sizes
 
     script: // this custom module prepares a whitelist for use with filtering bam files
     """
