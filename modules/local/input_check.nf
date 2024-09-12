@@ -2,7 +2,7 @@
 // Check input samplesheet and get read channels
 //
 
-include { SAMPLESHEET_CHECK } from '/home/gdstantonlab/lab/Lex/pipeline/modules/local/samplesheet_check.nf'
+include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check.nf'
 
 workflow INPUT_CHECK {
     take:

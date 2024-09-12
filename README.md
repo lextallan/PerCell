@@ -184,6 +184,16 @@ ________________________________________
 
 ________________________________________
 
+### Troubleshooting
+| Problem | Cause | Solution |
+|:---:|:---:|:---:|
+| High proportions of (non-optical) duplicate reads found in a sample | Over-amplification of ChIP DNA during library preparation PCR steps | Decrease the number of cycles used during PCR amplification (may require more efficient precipitations); if targeting a relatively low-abundance TF or remodeller protein, consider number of experimental cells |
+| High spike-in ratio of final reads | Non-optimal ratio of spike-in cells to experimental cells | Ideal spike-in chromatin should be between 2.5-50%, although other ratios may work. Decrease amount of spike-in cells and factor in expected genome size of spike-in:experimental genomes |
+| The pipeline exits with an error message including “fromIndex = -1” | Improper input csv samplesheet. All samples must end in an underscore followed by rep number, e.g. “_1” or “_R1”, even if there is only one replicate for the sample conditions.  | Rename the samples in the first column of the input csv file.  |
+| The pipeline fails during the ‘downsample’ step, with a message including “ln: failed to create symbolic link: File exists.’ | The pipeline is designed to be run using individual inputs for each sample. Attempting to reuse the same input for multiple samples creates errors when attempting to downsample the same file twice.  | Create a second entry in the input csv file, reusing the same fastq files but naming them distinctly. Ensure each sample lists one entry in its control column.  |
+| Unexpected number of peaks called (e.g. <5,000 is low, and > 100,000 is high regardless of the target)  | Inappropriate parameters or combination of parameters used with MACS2.  | When not using IDR, a –macs2_cutoff parameter of 1.301 (p/q-value of 0.05) or even 2 (p/q-value of 0.01) is suggested in order for the number of called peaks to fall within the normally expected range. <br>If using IDR, a particularly relaxed cutoff, such as 0.251 (approx. p/q-value of 0.6) or 0.316 (approx. p/q-value of 0.5) can result in  approximately 100,000 peaks to be called by MACS2. This less stringent peakset is necessary for the IDR software to output the expected number of peaks.  |
+________________________________________
+
 ### Citations and Acknowledgements
 
 [![DOI](https://zenodo.org/badge/827446696.svg)](https://zenodo.org/doi/10.5281/zenodo.12730196)
