@@ -37,7 +37,7 @@ process overlap_check {
     percent_common=\$(awk -v common="\$common" -v experimental="\$experimental" 'BEGIN { OFMT="%.4f"; x= common / experimental; print x}')
     echo "Percent_common: \${percent_common}"
     
-    # if the percent spiked in experimental and spike-in samples is greater than 0.5% then we consider a spike-in as used; 0 or 1 values passed through channel, then summed to check if every sample has spike-in content
+    # if the percent spiked in experimental and spike-in samples is greater than 2% then we consider a spike-in as used; 0 or 1 values passed through channel, then summed to check if every sample has spike-in content
     if [[ \${percent_spiked} > 0.02 ]]
     then
         spikein_used="yes"
