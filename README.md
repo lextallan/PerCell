@@ -107,11 +107,11 @@ ________________________________________
 
     --macs2_bigwig_method: choice of method with which to generate bigWig tracks for visualizing ChIP data within a genome browser, <ppois,qpois,subtract,logFE,FE,logLR,slogLR,max> (default: ppois)
 
-    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those call in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: true)
+    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those call in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: false)
 
     --idr_cutoff: cutoff value over which peaks will not be included within the output (default: 0.05)
 
-    --skip_consensus: choice of whether consensus peaks should be identified across replicates, especially recommended along with a more stringent macs2 cutoff if there are >2 replicates, <true,false> (default: false)
+    --skip_consensus: choice of whether consensus peaks should be identified across replicates, especially recommended along with a more stringent macs2 cutoff if there are >2 replicates, <true,false> (default: true)
 
     --skip_annotation: whether or not to use HOMER’s ‘annotatePeaks’ tool for annotation of peaks with nearest genes and genomic features <true,false> (default: false)
 
