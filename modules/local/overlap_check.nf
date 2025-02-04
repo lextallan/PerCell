@@ -26,15 +26,17 @@ process overlap_check {
     common=\$(cat ${meta.id}_common.txt | wc -l)
     experimental=\$(cat ${experimental_bam.baseName}.experimental.txt | wc -l)
     spikein=\$(cat ${spikein_bam.baseName}.spikein.txt | wc -l)
+    total=\$((experimental + spikein))
 
     echo "Common reads: \$common"
     echo "Experimental reads: \$experimental"
     echo "Spikein reads: \$spikein"
+    echo "Total reads: \$total"
 
-    percent_spiked=\$(awk -v spikein="\$spikein" -v experimental="\$experimental" 'BEGIN { OFMT="%.4f"; x= spikein / experimental; print x}')
+    percent_spiked=\$(awk -v spikein="\$spikein" -v total="\$total" 'BEGIN { OFMT="%.4f"; x= spikein / total; print x}')
     echo "Percent spiked-in: \${percent_spiked}"
 
-    percent_common=\$(awk -v common="\$common" -v experimental="\$experimental" 'BEGIN { OFMT="%.4f"; x= common / experimental; print x}')
+    percent_common=\$(awk -v common="\$common" -v total="\$total" 'BEGIN { OFMT="%.4f"; x= common / total; print x}')
     echo "Percent_common: \${percent_common}"
     
     # if the percent spiked in experimental and spike-in samples is greater than 2% then we consider a spike-in as used; 0 or 1 values passed through channel, then summed to check if every sample has spike-in content
