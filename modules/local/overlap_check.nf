@@ -60,6 +60,5 @@ process overlap_check {
     # Collect data for each sample -- write to csv and collect to report to user
     echo "Sample,Experimental_reads,Spikein_reads,Percent_spiked_in,Spikein_used,Common_reads,Percent_common" > overlap_report.csv
     echo "${meta.id},\$experimental,\$spikein,\${percent_spiked},\${spikein_used},\$common,\${percent_common}" >> overlap_report.csv
-
     """
 }
