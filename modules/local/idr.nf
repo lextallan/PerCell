@@ -14,7 +14,7 @@ process idr {
     val idr_cutoff
     
     output:
-    path "*idrValues.txt", emit: idr 
+    path "*.bed"         , emit: idr 
     path "*log.txt"      , emit: mqcIdr 
     path "v_idr.txt"     , emit: version
     path "*.png"         , emit: plot
@@ -29,7 +29,8 @@ process idr {
         --input-file-type bed \\
         --rank 5 \\
         --idr-threshold ${idr_cutoff} \\
-        -o ${prefix}_idrValues.txt \\
+        --output-file-type bed \\
+        -o ${prefix}.bed \\
         -l ${prefix}_log.txt \\
         --plot
     """
