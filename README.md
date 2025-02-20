@@ -103,19 +103,19 @@ ________________________________________
 
     --macs2_peak_method: choice of method with which to score macs2 bedgraphs for peak calling, <ppois,qpois,subtract,logFE,FE,logLR,slogLR,max> (default: ppois)
 
-    --macs2_cutoff: p/q-value cutoff used for calling peaks; unlike macs2’s default ‘callpeak’ command, cutoffs are taken in -log10(x) form. If using IDR, a particularly relaxed cutoff is highly recommended. For ChIPs targeting broader histone marks or when there are >2 replicates, IDR is not recommended and a more stringent cutoff of 1.301 (p/q-value of 0.05) or even 2 (p/q-value of 0.01) is suggested instead (default: 0.2218)
+    --macs2_cutoff: p/q-value cutoff used for calling peaks; unlike macs2’s default ‘callpeak’ command, cutoffs are taken in -log10(x) form. If using IDR, a particularly relaxed cutoff is highly recommended. For ChIPs targeting broader histone marks or when there are >2 replicates, IDR is not recommended and a more stringent cutoff of 1.301 (p/q-value of 0.05) or even 2 (p/q-value of 0.01) is suggested instead (default: 1.301)
 
     --macs2_bigwig_method: choice of method with which to generate bigWig tracks for visualizing ChIP data within a genome browser, <ppois,qpois,subtract,logFE,FE,logLR,slogLR,max> (default: ppois)
 
-    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those call in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: false)
+    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those call in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: true)
 
     --idr_cutoff: cutoff value over which peaks will not be included within the output (default: 0.05)
 
     --skip_consensus: choice of whether consensus peaks should be identified across replicates, especially recommended along with a more stringent macs2 cutoff if there are >2 replicates, <true,false> (default: true)
 
-    --skip_annotation: whether or not to use HOMER’s ‘annotatePeaks’ tool for annotation of peaks with nearest genes and genomic features <true,false> (default: false)
+    --skip_annotation: whether or not to use HOMER’s ‘annotatePeaks’ tool for annotation of peaks with nearest genes and genomic features <true,false> (default: true)
 
-    --skip_motif: whether or not to use HOMER’s ‘findMotifsGenome’ tool to find enriched DNA sequence motifs in called peaks <true,false> (default: false)
+    --skip_motif: whether or not to use HOMER’s ‘findMotifsGenome’ tool to find enriched DNA sequence motifs in called peaks <true,false> (default: true)
     ```
 
 ________________________________________
@@ -162,11 +162,13 @@ ________________________________________
     |       └── *.bigWig
     |-- macs2_subcommands
     |   |-- <macs2_cutoff>_cutoff
-    |   |   └── *_subcommands.narrowPeak
+    |   |   |-- *_subcommands.narrowPeak
+    |   |   └── <idr_cutoff>_idr
+    |   |       |-- *.bed
+    |   |       |-- *.bed.png
+    |   |       └── *_log.txt
     |   |-- <macs2_peak_method>_scored-bdg
     |   |   └── *.ppois-scored.bdg
-    |   |-- <idr_cutoff>_idr
-    |   |   └── *.narrowPeak
     |   └── consensus_peaks
     |       └── *.narrowPeak
     |-- multiqc
@@ -177,7 +179,7 @@ ________________________________________
     |   |-- <experimental_species>_summary.txt
     |   └── <spike-in_species>_summary.txt
     |-- scaling
-        └── scaling_factors.csv
+    |   └── scaling_factors.csv
     └── trimgalore
         └── *.fq.gz
 ```
