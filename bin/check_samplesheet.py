@@ -48,6 +48,8 @@ def check_samplesheet(file_in, file_out):
     """
 
     sample_mapping_dict = {}
+    control_list = []
+    sample_list = []
     with open(file_in, "r", encoding="utf-8-sig") as fin:
 
         ## Check header
@@ -144,6 +146,21 @@ def check_samplesheet(file_in, file_out):
                     print_error("Samplesheet contains duplicate rows!", "Line", line)
                 else:
                     sample_mapping_dict[sample].append(sample_info)
+
+            ## Check for reused controls across different samples - add unique samples and their listed controls to lists
+            if control:
+                if control not in control_list:
+                    control_list.append(control)
+                if sample not in sample_list:
+                    sample_list.append(sample) 
+
+    ## Check for reused controls across different samples - compare number of unique samples with unique listed controls. 
+    ## This allows for reusing controls when listed for the same (resequenced) but not different samples. 
+    if len(control_list) != len(sample_list):
+        print(
+                f"Controls cannot be reused across different immunoprecipitated samples! Please create separate entries for each use of a control."
+        )
+        sys.exit(1)
 
     ## Write validated samplesheet with appropriate columns
     if len(sample_mapping_dict) > 0:
