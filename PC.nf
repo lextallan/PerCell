@@ -549,16 +549,10 @@ workflow {
         ch_experimental_bam_spikestatus
             .no
             .set { ch_deduped_experimental }
-
-        PICARD_DEDUP_SPIKEIN
-            .out
-            .metrics
-            .map { meta, metrics -> metrics }
-            .collect()
-            .set { ch_spikein_picard_metrics }
     }
     
     // If skipping normalization, get deduped experimental alignments ready and empty/placeholder channels created for downstream analysis
+    // Otherwise, collect metrics for spike-in
     if (params.skip_downsample == true) {
         PICARD_DEDUP_EXPERIMENTAL
             .out
@@ -567,14 +561,14 @@ workflow {
 
         ch_downsampled_ip_control_bam = Channel.empty()
         ch_spikein_picard_metrics = Channel.empty()
+    } else {
+        PICARD_DEDUP_SPIKEIN
+            .out
+            .metrics
+            .map { meta, metrics -> metrics }
+            .collect()
+            .set { ch_spikein_picard_metrics }
     }
-
-    PICARD_DEDUP_EXPERIMENTAL
-        .out
-        .metrics
-        .map { meta, metrics -> metrics }
-        .collect()
-        .set { ch_experimental_picard_metrics }
     
     // Collect outputs for MultiQC.
     FASTQC_TRIMGALORE
@@ -583,6 +577,16 @@ workflow {
         .map { meta, metrics -> metrics }
         .collect()
         .set { ch_FASTQC_metrics }
+
+    PICARD_DEDUP_EXPERIMENTAL
+        .out
+        .metrics
+        .map { meta, metrics -> metrics }
+        .collect()
+        .set { ch_experimental_picard_metrics }
+
+    ch_Bowtie2_Experimental_metrics = Channel.empty()
+    ch_Bowtie2_Spikein_metrics = Channel.empty()
 
     if (params.aligner == 'bowtie2') {
         BOWTIE2_EXPERIMENTAL
