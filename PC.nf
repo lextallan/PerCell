@@ -27,7 +27,6 @@ include { MULTIQC } from './modules/local/multiqc.nf'
 include { homer_findMotifsGenome } from './modules/local/homer_findMotifsGenome.nf'
 include { idr } from './modules/local/idr.nf'
 include { bedtools_consensus } from './modules/local/bedtools_consensus.nf'
-include { picard_stats } from './modules/local/picard_stats.nf'
 
 workflow {
 
@@ -576,13 +575,37 @@ workflow {
         .map { meta, metrics -> metrics }
         .collect()
         .set { ch_experimental_picard_metrics }
+    
+    // Collect outputs for MultiQC.
+    FASTQC_TRIMGALORE
+        .out
+        .fastqc_zip
+        .map { meta, metrics -> metrics }
+        .collect()
+        .set { ch_FASTQC_metrics }
 
-    picard_stats (
-        ch_experimental_picard_metrics,
-        ch_spikein_picard_metrics.ifEmpty([])
-    )
+    if (params.aligner == 'bowtie2') {
+        BOWTIE2_EXPERIMENTAL
+            .out
+            .log
+            .map { meta, metrics -> metrics }
+            .collect()
+            .set { ch_Bowtie2_Experimental_metrics }
+
+        if (params.skip_downsample == false) {
+            BOWTIE2_SPIKEIN
+                .out
+                .log
+                .map { meta, metrics -> metrics }
+                .collect()
+                .set { ch_Bowtie2_Spikein_metrics }
+        }
+    }
 
     MULTIQC (
+        ch_FASTQC_metrics.ifEmpty([]),
+        ch_Bowtie2_Experimental_metrics.ifEmpty([]),
+        ch_Bowtie2_Spikein_metrics.ifEmpty([]),
         ch_experimental_picard_metrics,
         ch_spikein_picard_metrics.ifEmpty([])
     )
