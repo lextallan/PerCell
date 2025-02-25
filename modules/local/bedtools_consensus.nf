@@ -27,10 +27,11 @@ process bedtools_consensus {
     for i in "\${files[@]:1}"
     do
         \$first
-        bedtools intersect -wa -a running_consensus.bed -b \$i > running_consensus.bed
+        bedtools intersect -wa -a running_consensus.bed -b \$i > running_consensus_\${i}.bed
         first=''
+        last=\${i}
     done
 
-    mv running_consensus.bed ${prefix}.consensus.bed
+    mv running_consensus_\${i}.bed ${prefix}.consensus.bed
     """
 }
