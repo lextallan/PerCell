@@ -30,6 +30,7 @@ include { bedtools_consensus } from './modules/local/bedtools_consensus.nf'
 
 workflow {
 
+    // Check inputs and prepare FASTQ files for alignment:
     INPUT_CHECK (
         file(params.input),
         params.seq_center
@@ -41,7 +42,7 @@ workflow {
         params.skip_trimming
     )
 
-    // Setting up channels based on parameter selections for experimental and spike-in genomes.
+    // Setting up channels based on parameter selections for experimental and spike-in genomes
     ch_experimental_fa = Channel.empty()
     ch_spikein_fa = Channel.empty()
     ch_experimental_bowtie2_index = Channel.empty()
@@ -53,6 +54,7 @@ workflow {
     ch_spikein_blacklist = Channel.empty()
     ch_macs_gsize = Channel.empty()
 
+    // Alignment and aligner specific steps:
     // Create index for chosen aligner if not supplied and set up channels for experimental and spike-in genomes
     if (params.experimental == 'human') {
         ch_experimental_fa = params.human_fa
@@ -282,7 +284,7 @@ workflow {
         .whitelist
         .set { ch_whitelist_experimental }
 
-    // Align with either chromap or bowtie2 to both experimental and spike-in genomes
+    // Align with either Chromap or Bowtie2 to experimental genome
     if (params.aligner == 'chromap') {
             CHROMAP_EXPERIMENTAL (
                 FASTQC_TRIMGALORE.out.reads,
@@ -333,8 +335,7 @@ workflow {
         PICARD_MERGE_EXPERIMENTAL.out.bam
     )
 
-    // Overriding spike-in status if user has specified
-    // Spike-in steps below are skipped if params.skip_downsample is false
+    // Spike-in specific steps (skipped if params.skip_downsample is true):
     if (params.skip_downsample != true) {
 
         whitelist_spikein (
@@ -551,8 +552,8 @@ workflow {
             .set { ch_deduped_experimental }
     }
     
-    // If skipping normalization, get deduped experimental alignments ready and empty/placeholder channels created for downstream analysis
-    // Otherwise, collect metrics for spike-in
+    // If skipping normalization, get deduplicated experimental alignments ready and empty/placeholder channels created for downstream analysis
+    // Otherwise, collect deduplication metrics for spike-in
     if (params.skip_downsample == true) {
         PICARD_DEDUP_EXPERIMENTAL
             .out
@@ -570,7 +571,13 @@ workflow {
             .set { ch_spikein_picard_metrics }
     }
     
-    // Collect outputs for MultiQC.
+    // Analysis steps downstream of normalization:
+    // Collect outputs for MultiQC
+    // Set up empty optional channels, in case they aren't created
+    ch_FASTQC_metrics = Channel.empty()
+    ch_Bowtie2_Experimental_metrics = Channel.empty()
+    ch_Bowtie2_Spikein_metrics = Channel.empty()
+
     FASTQC_TRIMGALORE
         .out
         .fastqc_zip
@@ -584,9 +591,6 @@ workflow {
         .map { meta, metrics -> metrics }
         .collect()
         .set { ch_experimental_picard_metrics }
-
-    ch_Bowtie2_Experimental_metrics = Channel.empty()
-    ch_Bowtie2_Spikein_metrics = Channel.empty()
 
     if (params.aligner == 'bowtie2') {
         BOWTIE2_EXPERIMENTAL
@@ -645,6 +649,7 @@ workflow {
         )
     }
 
+    // Create bigWig files for visualization
     macs2_bdgcmp (
         macs2_peakcalling.out.chip_ctrl_bdg,
         whitelist_experimental.out.sizes,
@@ -712,6 +717,6 @@ workflow {
 
 workflow.onComplete {
     println "\n"
-    println "\033[1;34mPipeline completed at: $workflow.complete after $workflow.duration seconds.\033[0m"
+    println "\033[1;34mPerCell pipeline completed at: $workflow.complete after $workflow.duration seconds.\033[0m"
     println "\033[1;34mExecution status: ${ workflow.success ? 'Completed successfully!' : 'Failed :/' }\033[0m"
 }
