@@ -21,16 +21,15 @@ process bedtools_consensus {
     cat ${combined_peaks} | sort -k1,1 -k2,2n | bedtools merge -i stdin > merged_peaks.bed
 
     files=(*.narrowPeak)
-    first=\${files[0]}
-    bedtools intersect -wa -a merged_peaks.bed -b \${first} > running_consensus_\${first}.bed
-    last=\${first}
+    next=\${files[0]}
+    bedtools intersect -wa -a merged_peaks.bed -b \${next} > running_consensus_\${next}.bed
 
     for i in "\${files[@]:1}"
     do
-        bedtools intersect -wa -a running_consensus_\${last}.bed -b \$i > running_consensus_\${i}.bed
-        last=\${i}
+        bedtools intersect -wa -a running_consensus_\${next}.bed -b \${i} > running_consensus_\${i}.bed
+        next=\${i}
     done
 
-    cp running_consensus_\${i}.bed ${prefix}.consensus.bed
+    cp running_consensus_\${next}.bed ${prefix}.consensus.bed
     """
 }
