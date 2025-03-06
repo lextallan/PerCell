@@ -8,7 +8,7 @@ process TRIMGALORE {
         'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(reads, stageAs: '?/*')
 
     output:
     tuple val(meta), path("*{trimmed,val}*.fq.gz"), emit: reads
