@@ -2,7 +2,7 @@ process macs2_bdgcmp {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "macs2=2.2.9.1 bedtools=2.31.0 ucsc-bedclip=377 ucsc-bedgraphtobigwig=445" : null)
+    conda (params.enable_conda ? "bioconda::macs2=2.2.9.1 bioconda::bedtools=2.31.0 bioconda::ucsc-bedclip=377 bioconda::ucsc-bedgraphtobigwig=445" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-20f97261dc026feb7aca77ec7eca9ebfcb93f1ef:f4f30a4635214a5ded57a1b274e5f847eff9aa0b-0' :
         'quay.io/biocontainers/mulled-v2-20f97261dc026feb7aca77ec7eca9ebfcb93f1ef:f4f30a4635214a5ded57a1b274e5f847eff9aa0b-0' }"
