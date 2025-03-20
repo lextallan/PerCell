@@ -152,25 +152,25 @@ ________________________________________
     |           └── *.metrics.txt
     |-- downsampled
     |   └── *_ds.bam
-    |-- homer
-    |   |-- annotations
-    |   |   └── *.txt
-    |   └── motifs
-    |       └── *.html
     |-- macs2_bigwigs
     |   └── <macs2_bigwig_method>
     |       └── *.bigWig
     |-- macs2_subcommands
     |   |-- <macs2_cutoff>_cutoff
     |   |   |-- *_subcommands.narrowPeak
-    |   |   └── <idr_cutoff>_idr
-    |   |       |-- *.bed
-    |   |       |-- *.bed.png
-    |   |       └── *_log.txt
-    |   |-- <macs2_peak_method>_scored-bdg
-    |   |   └── *.ppois-scored.bdg
-    |   └── consensus_peaks
-    |       └── *.narrowPeak
+    |   |   |-- <idr_cutoff>_idr
+    |   |   |   |-- *.bed
+    |   |   |   |-- *.bed.png
+    |   |   |   └── *_log.txt
+    |   |   |-- consensus_peaks
+    |   |   |   └── *.narrowPeak
+    |   |   └── homer
+    |   |       |-- annotations
+    |   |       |   └── *.txt
+    |   |       └── motifs
+    |   |           └── *.html
+    |   └── <macs2_peak_method>_scored-bdg
+    |       └── *.ppois-scored.bdg
     |-- multiqc
     |   └── MultiQC-Report-for-PerCell-pipeline.html
     |-- overlap_check
