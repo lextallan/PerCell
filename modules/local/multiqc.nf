@@ -7,8 +7,11 @@ process MULTIQC {
         'biocontainers/multiqc:1.14--pyhdfd78af_0' }"
 
     input:
-    path ('metrics/*'), stageAs: 'experimental/*'
-    path ('metrics/*'), stageAs: 'spikein/*'
+    path ('*.zip'), stageAs: 'FastQC/*'
+    path ('*.log'), stageAs: 'Bowtie2-Experimental/*'
+    path ('*.log'), stageAs: 'Bowtie2-SpikeIn/*'
+    path ('metrics/*'), stageAs: 'Picard-Experimental/*'
+    path ('metrics/*'), stageAs: 'Picard-SpikeIn/*'
 
     output:
     path "*multiqc_report.html", emit: report

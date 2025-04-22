@@ -18,19 +18,18 @@ process bedtools_consensus {
     length = combined_peaks.size()
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    cat ${combined_peaks} | sort -k1,1 -k2,2n | bedtools merge -i stdin > merged_peaks.bed
-
+    awk 1 ${combined_peaks} | sort -k1,1 -k2,2n | bedtools merge -i stdin > merged_peaks.bed
 
     files=(*.narrowPeak)
-    first=\$(bedtools intersect -wa -a merged_peaks.bed -b \${files[0]} > running_consensus.bed)
+    next=\${files[0]}
+    bedtools intersect -wa -a merged_peaks.bed -b \${next} > running_consensus_\${next}.bed
 
     for i in "\${files[@]:1}"
     do
-        \$first
-        bedtools intersect -wa -a running_consensus.bed -b \$i > running_consensus.bed
-        first=''
+        bedtools intersect -wa -a running_consensus_\${next}.bed -b \${i} > running_consensus_\${i}.bed
+        next=\${i}
     done
 
-    mv running_consensus.bed ${prefix}.consensus.bed
+    cp running_consensus_\${next}.bed ${prefix}.consensus.bed
     """
 }

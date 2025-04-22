@@ -107,7 +107,7 @@ ________________________________________
 
     --macs2_bigwig_method: choice of method with which to generate bigWig tracks for visualizing ChIP data within a genome browser, <ppois,qpois,subtract,logFE,FE,logLR,slogLR,max> (default: ppois)
 
-    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those call in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: true)
+    --skip_idr: if the IDR (Irreproducible Discovery Rate, https://github.com/nboley/idr) framework should be used to statistically identify significant peaks across two replicates. According to authors, the software is not designed for use with particularly broad peaks (e.g. those called in a ChIP for H3K9me3) and requires using a relaxed macs2 cutoff value in order to properly function, <true,false> (default: true)
 
     --idr_cutoff: cutoff value over which peaks will not be included within the output (default: 0.05)
 
@@ -122,14 +122,13 @@ ________________________________________
 
 ### Summary of Pipeline Workflow
 
-All pipeline outputs are stored in a directory named after the choice of alignment tool (`--aligner`) within the user-specified output directory (`--outidir`). When the applicable options are enabled (i.e. when `--skip_trimming` and `--skip_fastqc` set to false), adapter sequences are trimmed from reads and quality control data is collected and made available to the user via the MultiQC software in readable html format (MultiQC-Report-for-PerCell-pipeline.html). For user convenience, trimmed fastq files can be retained and organized for future use via the `--save_trimmed` parameter and stored in the trimgalore directory. 
-Each fastq sequencing file is separately aligned to both the chosen experimental (`--experimental`) and spike-in (`--spikein`) genomes in a parallel fashion, with these intermediate alignments available in the aligned directory. Misaligned and duplicated reads are removed using the Samtools and Picard software suites, with post-filtering alignments and metrics data stored in the deduplicated directory. Summaries of these filtering metrics can be found in the picard_summaries directory. 
+All pipeline outputs are stored in a directory named after the choice of alignment tool (`--aligner`) within the user-specified output directory (`--outidir`). When the applicable options are enabled (i.e. when `--skip_trimming` and `--skip_fastqc` set to false), adapter sequences are trimmed from reads in fastq files. For user convenience, these trimmed fastq files can be retained and organized for future use via the `--save_trimmed` parameter and stored in the trimgalore directory. Each fastq sequencing file is separately aligned to both the chosen experimental (`--experimental`) and spike-in (`--spikein`) genomes in a parallel fashion, with these intermediate alignments available in the aligned directory. Misaligned and duplicated reads are removed using the Samtools and Picard software suites, with post-filtering alignments and metrics data stored in the deduplicated directory.
 
 Next, the percentages of overlapping reads (independently aligning to both genomes) and spike-in reads (as a fraction of all aligned reads) are calculated for each sample, with the results collected in a single csv file (overlap_report.csv). Since the accuracy of normalization can be difficult when the percentage of spike-in reads is too low, the pipeline is designed to automatically exclude any samples with a calculated percentage of spike-in reads below 0.5%. This functionality can be overridden, forcing the pipeline to attempt normalization for all samples, by setting the `--override_spikeinfail` parameter to true. Conversely, PerCell normalization can be disabled (e.g. for analysis of ChIP-seq data lacking spike-in) by setting the parameter `--skip_downsample` to true. 
 
 If PerCell normalization is enabled, scaling factors are calculated for each sample (scaling_factors.csv) based on the relative number of properly aligned spike-in reads. These factors are used to randomly (via the `--seed` parameter) downsample reads, with the now normalized alignment files stored in the downsampled directory. Each immunoprecipitated sample is matched with its corresponding control, and peaks are called using the MACS2 software. This is performed using MACS2’s subcommands to prevent the default MACS2 peak calling command’s normalization from obscuring our own. Each sample’s immunoprecipitated/control pairing is used to score potential peaks using the selected method (`macs2_peak_method`) and stored in the macs2_subcommand directory along with narrowPeak files containing peaks passing the cutoff given in the `--macs2_cutoff` parameter. Bedgraphs for each pair of immunoprecipitated and control samples are next compared using MACS2’s bdgcmp command based on the `--macs2_bigwig_method` parameter, before conversion into the visualizable bigWig format using tools from the UCSC software suite. 
 
-Optionally, setting `--skip_idr` to false will use the IDR framework to identify statistically consistent peaks across two replicates (output in the idr directory) based on the chosen  `--idr_cutoff` value. As an alternative, e.g. when a more stringent MACS2 peak calling cutoff is used, consensus peaks can instead be identified using BEDTools by setting `--skip_consensus` to false. Finally, the HOMER software suite can be used to annotate peaksets via the `--skip_annotation` and identify enriched motifs via `--skip_motif` parameters, with the output found within their respective subdirectories inside the homer directory. 
+Optionally, setting `--skip_idr` to false will use the IDR framework to identify statistically consistent peaks across two replicates (output in the idr directory) based on the chosen  `--idr_cutoff` value. As an alternative, e.g. when a more stringent MACS2 peak calling cutoff is used, consensus peaks can instead be identified using BEDTools by setting `--skip_consensus` to false. Finally, the HOMER software suite can be used to annotate peaksets via the `--skip_annotation` and identify enriched motifs via `--skip_motif` parameters, with the output found within their respective subdirectories inside the homer directory. Various quality control data is collected and made available to the user via the MultiQC software in readable html format (MultiQC-Report-for-PerCell-pipeline.html).
 
 ________________________________________
 
@@ -152,32 +151,29 @@ ________________________________________
     |           └── *.metrics.txt
     |-- downsampled
     |   └── *_ds.bam
-    |-- homer
-    |   |-- annotations
-    |   |   └── *.txt
-    |   └── motifs
-    |       └── *.html
     |-- macs2_bigwigs
     |   └── <macs2_bigwig_method>
     |       └── *.bigWig
     |-- macs2_subcommands
     |   |-- <macs2_cutoff>_cutoff
     |   |   |-- *_subcommands.narrowPeak
-    |   |   └── <idr_cutoff>_idr
-    |   |       |-- *.bed
-    |   |       |-- *.bed.png
-    |   |       └── *_log.txt
-    |   |-- <macs2_peak_method>_scored-bdg
-    |   |   └── *.ppois-scored.bdg
-    |   └── consensus_peaks
-    |       └── *.narrowPeak
+    |   |   |-- <idr_cutoff>_idr
+    |   |   |   |-- *.bed
+    |   |   |   |-- *.bed.png
+    |   |   |   └── *_log.txt
+    |   |   |-- consensus_peaks
+    |   |   |   └── *.narrowPeak
+    |   |   └── homer
+    |   |       |-- annotations
+    |   |       |   └── *.txt
+    |   |       └── motifs
+    |   |           └── *.html
+    |   └── <macs2_peak_method>_scored-bdg
+    |       └── *.ppois-scored.bdg
     |-- multiqc
     |   └── MultiQC-Report-for-PerCell-pipeline.html
     |-- overlap_check
     |   └── overlap_report.csv
-    |-- picard_summaries
-    |   |-- <experimental_species>_summary.txt
-    |   └── <spike-in_species>_summary.txt
     |-- scaling
     |   └── scaling_factors.csv
     └── trimgalore

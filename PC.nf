@@ -27,10 +27,10 @@ include { MULTIQC } from './modules/local/multiqc.nf'
 include { homer_findMotifsGenome } from './modules/local/homer_findMotifsGenome.nf'
 include { idr } from './modules/local/idr.nf'
 include { bedtools_consensus } from './modules/local/bedtools_consensus.nf'
-include { picard_stats } from './modules/local/picard_stats.nf'
 
 workflow {
 
+    // Check inputs and prepare FASTQ files for alignment:
     INPUT_CHECK (
         file(params.input),
         params.seq_center
@@ -42,7 +42,7 @@ workflow {
         params.skip_trimming
     )
 
-    // Setting up channels based on parameter selections for experimental and spike-in genomes.
+    // Setting up channels based on parameter selections for experimental and spike-in genomes
     ch_experimental_fa = Channel.empty()
     ch_spikein_fa = Channel.empty()
     ch_experimental_bowtie2_index = Channel.empty()
@@ -54,6 +54,7 @@ workflow {
     ch_spikein_blacklist = Channel.empty()
     ch_macs_gsize = Channel.empty()
 
+    // Alignment and aligner specific steps:
     // Create index for chosen aligner if not supplied and set up channels for experimental and spike-in genomes
     if (params.experimental == 'human') {
         ch_experimental_fa = params.human_fa
@@ -283,7 +284,7 @@ workflow {
         .whitelist
         .set { ch_whitelist_experimental }
 
-    // Align with either chromap or bowtie2 to both experimental and spike-in genomes
+    // Align with either Chromap or Bowtie2 to experimental genome
     if (params.aligner == 'chromap') {
             CHROMAP_EXPERIMENTAL (
                 FASTQC_TRIMGALORE.out.reads,
@@ -334,8 +335,7 @@ workflow {
         PICARD_MERGE_EXPERIMENTAL.out.bam
     )
 
-    // Overriding spike-in status if user has specified
-    // Spike-in steps below are skipped if params.skip_downsample is false
+    // Spike-in specific steps (skipped if params.skip_downsample is true):
     if (params.skip_downsample != true) {
 
         whitelist_spikein (
@@ -550,16 +550,10 @@ workflow {
         ch_experimental_bam_spikestatus
             .no
             .set { ch_deduped_experimental }
-
-        PICARD_DEDUP_SPIKEIN
-            .out
-            .metrics
-            .map { meta, metrics -> metrics }
-            .collect()
-            .set { ch_spikein_picard_metrics }
     }
     
-    // If skipping normalization, get deduped experimental alignments ready and empty/placeholder channels created for downstream analysis
+    // If skipping normalization, get deduplicated experimental alignments ready and empty/placeholder channels created for downstream analysis
+    // Otherwise, collect deduplication metrics for spike-in
     if (params.skip_downsample == true) {
         PICARD_DEDUP_EXPERIMENTAL
             .out
@@ -568,7 +562,28 @@ workflow {
 
         ch_downsampled_ip_control_bam = Channel.empty()
         ch_spikein_picard_metrics = Channel.empty()
+    } else {
+        PICARD_DEDUP_SPIKEIN
+            .out
+            .metrics
+            .map { meta, metrics -> metrics }
+            .collect()
+            .set { ch_spikein_picard_metrics }
     }
+    
+    // Analysis steps downstream of normalization:
+    // Collect outputs for MultiQC
+    // Set up empty optional channels, in case they aren't created
+    ch_FASTQC_metrics = Channel.empty()
+    ch_Bowtie2_Experimental_metrics = Channel.empty()
+    ch_Bowtie2_Spikein_metrics = Channel.empty()
+
+    FASTQC_TRIMGALORE
+        .out
+        .fastqc_zip
+        .map { meta, metrics -> metrics }
+        .collect()
+        .set { ch_FASTQC_metrics }
 
     PICARD_DEDUP_EXPERIMENTAL
         .out
@@ -577,12 +592,28 @@ workflow {
         .collect()
         .set { ch_experimental_picard_metrics }
 
-    picard_stats (
-        ch_experimental_picard_metrics,
-        ch_spikein_picard_metrics.ifEmpty([])
-    )
+    if (params.aligner == 'bowtie2') {
+        BOWTIE2_EXPERIMENTAL
+            .out
+            .log
+            .map { meta, metrics -> metrics }
+            .collect()
+            .set { ch_Bowtie2_Experimental_metrics }
+
+        if (params.skip_downsample == false) {
+            BOWTIE2_SPIKEIN
+                .out
+                .log
+                .map { meta, metrics -> metrics }
+                .collect()
+                .set { ch_Bowtie2_Spikein_metrics }
+        }
+    }
 
     MULTIQC (
+        ch_FASTQC_metrics.ifEmpty([]),
+        ch_Bowtie2_Experimental_metrics.ifEmpty([]),
+        ch_Bowtie2_Spikein_metrics.ifEmpty([]),
         ch_experimental_picard_metrics,
         ch_spikein_picard_metrics.ifEmpty([])
     )
@@ -618,6 +649,7 @@ workflow {
         )
     }
 
+    // Create bigWig files for visualization
     macs2_bdgcmp (
         macs2_peakcalling.out.chip_ctrl_bdg,
         whitelist_experimental.out.sizes,
@@ -685,6 +717,6 @@ workflow {
 
 workflow.onComplete {
     println "\n"
-    println "\033[1;34mPipeline completed at: $workflow.complete after $workflow.duration seconds.\033[0m"
+    println "\033[1;34mPerCell pipeline completed at: $workflow.complete after $workflow.duration seconds.\033[0m"
     println "\033[1;34mExecution status: ${ workflow.success ? 'Completed successfully!' : 'Failed :/' }\033[0m"
 }
