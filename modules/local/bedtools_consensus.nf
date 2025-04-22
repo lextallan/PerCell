@@ -18,7 +18,7 @@ process bedtools_consensus {
     length = combined_peaks.size()
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    cat ${combined_peaks} | sort -k1,1 -k2,2n | bedtools merge -i stdin > merged_peaks.bed
+    awk 1 ${combined_peaks} | sort -k1,1 -k2,2n | bedtools merge -i stdin > merged_peaks.bed
 
     files=(*.narrowPeak)
     next=\${files[0]}
