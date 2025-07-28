@@ -42,238 +42,97 @@ workflow {
         params.skip_trimming
     )
 
-    // Setting up channels based on parameter selections for experimental and spike-in genomes
-    ch_experimental_fa = Channel.empty()
-    ch_spikein_fa = Channel.empty()
-    ch_experimental_bowtie2_index = Channel.empty()
-    ch_experimental_chro_index = Channel.empty()
-    ch_spikein_bowtie2_index = Channel.empty()
-    ch_spikein_chro_index = Channel.empty()
-    ch_experimental_gtf = Channel.empty()
-    ch_experimental_blacklist = Channel.empty()
-    ch_spikein_blacklist = Channel.empty()
-    ch_macs_gsize = Channel.empty()
-
-    // Alignment and aligner specific steps:
-    // Create index for chosen aligner if not supplied and set up channels for experimental and spike-in genomes
+    // Assign experimental input files based on user parameters
     if (params.experimental == 'human') {
         ch_experimental_fa = params.human_fa
-        if (params.aligner == 'chromap') {
-            if (params.human_chro_index != null) {
-                ch_experimental_chro_index = params.human_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_chro_index = CHROMAP_INDEX_EXPERIMENTAL.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.human_bowtie2_index != null) {
-                ch_experimental_bowtie2_index = params.human_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_bowtie2_index = BOWTIE2_BUILD_EXPERIMENTAL.out.index
-            }
-        }
-        ch_experimental_gtf = params.human_gtf
-        ch_experimental_blacklist = params.human_blacklist
+        ch_experimental_chro_index = params.human_chro_index ?: null
+        ch_experimental_bowtie2_index = params.human_bowtie2_index ?: null
+        ch_experimental_gtf = params.human_gtf ?: Channel.empty()
+        ch_experimental_blacklist = params.human_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_human
-        ch_experimental_gtf = params.human_gtf
     }
     if (params.experimental == 'mouse') {
         ch_experimental_fa = params.mouse_fa
-        if (params.aligner == 'chromap') {
-            if (params.mouse_chro_index != null) {
-                ch_experimental_chro_index = params.mouse_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_chro_index = CHROMAP_INDEX_EXPERIMENTAL.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.mouse_bowtie2_index != null) {
-                ch_experimental_bowtie2_index = params.mouse_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_bowtie2_index = BOWTIE2_BUILD_EXPERIMENTAL.out.index
-            }
-        }
-        ch_experimental_gtf = params.mouse_gtf
-        ch_experimental_blacklist = params.mouse_blacklist
+        ch_experimental_chro_index = params.mouse_chro_index ?: null
+        ch_experimental_bowtie2_index = params.mouse_bowtie2_index ?: null
+        ch_experimental_gtf = params.mouse_gtf ?: Channel.empty()
+        ch_experimental_blacklist = params.mouse_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_mouse
     }
     if (params.experimental == 'zebrafish') {
         ch_experimental_fa = params.zebrafish_fa
-        if (params.aligner == 'chromap') {
-            if (params.zebrafish_chro_index != null) {
-                ch_experimental_chro_index = params.zebrafish_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_chro_index = CHROMAP_INDEX_EXPERIMENTAL.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.zebrafish_bowtie2_index != null) {
-                ch_experimental_bowtie2_index = params.zebrafish_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_bowtie2_index = BOWTIE2_BUILD_EXPERIMENTAL.out.index
-            }
-        }
-        ch_experimental_gtf = params.zebrafish_gtf
-        ch_experimental_blacklist = params.zebrafish_blacklist
+        ch_experimental_chro_index = params.zebrafish_chro_index ?: null
+        ch_experimental_bowtie2_index = params.zebrafish_bowtie2_index ?: null
+        ch_experimental_gtf = params.zebrafish_gtf ?: Channel.empty()
+        ch_experimental_blacklist = params.zebrafish_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_zebrafish
     }
     if (params.experimental == 'fly') {
         ch_experimental_fa = params.fly_fa
-        if (params.aligner == 'chromap') {
-            if (params.fly_chro_index != null) {
-                ch_experimental_chro_index = params.fly_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_chro_index = CHROMAP_INDEX_EXPERIMENTAL.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.fly_bowtie2_index != null) {
-                ch_experimental_bowtie2_index = params.fly_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_EXPERIMENTAL (
-                    ch_experimental_fa
-                )
-                ch_experimental_bowtie2_index = BOWTIE2_BUILD_EXPERIMENTAL.out.index
-            }
-        }
-        ch_experimental_gtf = params.fly_gtf
-        ch_experimental_blacklist = params.fly_blacklist
+        ch_experimental_chro_index = params.fly_chro_index ?: null
+        ch_experimental_bowtie2_index = params.fly_bowtie2_index ?: null
+        ch_experimental_gtf = params.fly_gtf ?: Channel.empty()
+        ch_experimental_blacklist = params.fly_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_fly
     }
+
+    // Assign spike-in input files based on user parameters
     if (params.spikein == 'human') {
         ch_spikein_fa = params.human_fa
-        if (params.aligner == 'chromap') {
-            if (params.human_chro_index != null) {
-                ch_spikein_chro_index = params.human_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_chro_index = CHROMAP_INDEX_SPIKEIN.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.human_bowtie2_index != null) {
-                ch_spikein_bowtie2_index = params.human_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
-            }
-        }
-        ch_spikein_blacklist = params.human_blacklist
+        ch_spikein_chro_index = params.human_chro_index ?: null
+        ch_spikein_bowtie2_index = params.human_bowtie2_index ?: null
+        ch_spikein_blacklist = params.human_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'mouse') {
         ch_spikein_fa = params.mouse_fa
-        if (params.aligner == 'chromap') {
-            if (params.mouse_chro_index != null) {
-                ch_spikein_chro_index = params.mouse_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_chro_index = CHROMAP_INDEX_SPIKEIN.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.mouse_bowtie2_index != null) {
-                ch_spikein_bowtie2_index = params.mouse_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
-            }
-        }
-        ch_spikein_blacklist = params.mouse_blacklist
+        ch_spikein_chro_index = params.mouse_chro_index ?: null
+        ch_spikein_bowtie2_index = params.mouse_bowtie2_index ?: null
+        ch_spikein_blacklist = params.mouse_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'zebrafish') {
         ch_spikein_fa = params.zebrafish_fa
-        if (params.aligner == 'chromap') {
-            if (params.zebrafish_chro_index != null) {
-                ch_spikein_chro_index = params.zebrafish_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_chro_index = CHROMAP_INDEX_SPIKEIN.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.zebrafish_bowtie2_index != null) {
-                ch_spikein_bowtie2_index = params.zebrafish_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
-            }
-        }
-        ch_spikein_blacklist = params.zebrafish_blacklist
+        ch_spikein_chro_index = params.zebrafish_chro_index ?: null
+        ch_spikein_bowtie2_index = params.zebrafish_bowtie2_index ?: null
+        ch_spikein_blacklist = params.zebrafish_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'fly') {
         ch_spikein_fa = params.fly_fa
-        if (params.aligner == 'chromap') {
-            if (params.fly_chro_index != null) {
-                ch_spikein_chro_index = params.fly_chro_index
-            }
-            else { 
-                CHROMAP_INDEX_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_chro_index = CHROMAP_INDEX_SPIKEIN.out.index
-            }
-        }
-        if (params.aligner == 'bowtie2') {
-            if (params.fly_bowtie2_index != null) {
-                ch_spikein_bowtie2_index = params.fly_bowtie2_index
-            }
-            else {
-                BOWTIE2_BUILD_SPIKEIN (
-                    ch_spikein_fa
-                )
-                ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
-            }
-        }
-        ch_spikein_blacklist = params.fly_blacklist
+        ch_spikein_chro_index = params.fly_chro_index ?: null
+        ch_spikein_bowtie2_index = params.fly_bowtie2_index ?: null
+        ch_spikein_blacklist = params.fly_blacklist ?: Channel.empty()
     }
 
+    // Create indices for chosen aligner if not supplied
+    if (params.aligner == 'chromap') {
+        if (ch_experimental_chro_index == null) {
+            CHROMAP_INDEX_EXPERIMENTAL (
+                ch_experimental_fa
+            )
+            ch_experimental_chro_index = CHROMAP_INDEX_EXPERIMENTAL.out.index
+        if (params.skip_downsample == false && ch_spikein_chro_index == null) {
+            CHROMAP_INDEX_SPIKEIN (
+                ch_spikein_fa
+            )
+            ch_spikein_chro_index = CHROMAP_INDEX_SPIKEIN.out.index
+            }
+        }
+    }
+    if (params.aligner == 'bowtie2') {
+        if (ch_experimental_bowtie2_index == null) {
+            BOWTIE2_BUILD_EXPERIMENTAL (
+                ch_experimental_fa
+            )
+            ch_experimental_bowtie2_index = BOWTIE2_BUILD_EXPERIMENTAL.out.index
+        }
+        if (params.skip_downsample == false && ch_spikein_bowtie2_index == null) {
+            BOWTIE2_BUILD_SPIKEIN (
+                ch_spikein_fa
+            )
+            ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
+        }
+    }
+    
+    // Create whitelist for samtools
     whitelist_experimental (
         ch_experimental_fa,
         ch_experimental_blacklist
@@ -284,7 +143,7 @@ workflow {
         .whitelist
         .set { ch_whitelist_experimental }
 
-    // Align with either Chromap or Bowtie2 to experimental genome
+    // Align with either chromap or bowtie2 experimental genome
     if (params.aligner == 'chromap') {
             CHROMAP_EXPERIMENTAL (
                 FASTQC_TRIMGALORE.out.reads,
@@ -372,7 +231,7 @@ workflow {
             ch_whitelist_spikein
         )
 
-        // Group resequenced BAMs to prep for merge, adjust meta.id accordingly
+        // Group resequenced spike-in BAMs to prep for merge, adjust meta.id accordingly
         samtools_spikein
             .out
             .bam
@@ -398,7 +257,7 @@ workflow {
             PICARD_MERGE_SPIKEIN.out.bam
         )
     
-        // Join experimental and spike-in BAMs and check for overlap
+        // Join experimental and spike-in BAMs in one channel and check for overlap
         PICARD_DEDUP_EXPERIMENTAL
             .out
             .bam
