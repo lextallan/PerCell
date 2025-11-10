@@ -143,7 +143,7 @@ workflow {
         .whitelist
         .set { ch_whitelist_experimental }
 
-    // Align with either chromap or bowtie2 experimental genome
+    // Align to experimental genome with either Chromap or Bowtie2
     if (params.aligner == 'chromap') {
             CHROMAP_EXPERIMENTAL (
                 FASTQC_TRIMGALORE.out.reads,
@@ -541,9 +541,20 @@ workflow {
                     [ meta_new, peaks ] 
             }
             .set { ch_combined_peaks }
+
+        ch_combined_peaks
+            .map { 
+                meta, peaks ->
+                    def count = peaks.size()
+                    if (count != 2) {
+                        log.warn "IDR can only be run on 2 peak files. Found ${count} for antibody/treatment \"${meta.id}\" - Skipping IDR for these samples."
+                    }
+                    count == 2 ? [ meta, peaks ] : null
+            }
+            .set { ch_combined_idr_peaks }
             
         idr (
-            ch_combined_peaks,
+            ch_combined_idr_peaks,
             params.idr_cutoff
         )
     }

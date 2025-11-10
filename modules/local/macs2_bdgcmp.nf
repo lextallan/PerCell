@@ -35,8 +35,7 @@ process macs2_bdgcmp {
         awk '{if (\$3 != -1) print \$0}' | \\
         bedClip stdin ${chr_sizes} ${prefix}_signal.bedgraph
 
-    # Merge bed to enable bedgraphtobigwig without error
-    # !Determine if still necessary!
+    # Merge bed to avoid bedGraphToBigWig errors about overlapping regions
     mergeBed -i ${prefix}_signal.bedgraph -d -1 -c 4 -o max > ${prefix}_signal.merged.bedgraph
 
     bedGraphToBigWig ${prefix}_signal.merged.bedgraph ${chr_sizes} ${prefix}_signal.bigWig
