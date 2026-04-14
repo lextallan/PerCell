@@ -101,6 +101,12 @@ workflow {
         ch_spikein_bowtie2_index = params.fly_bowtie2_index ?: null
         ch_spikein_blacklist = params.fly_blacklist ?: Channel.empty()
     }
+    if (params.spikein == 'ecoli') {
+        ch_spikein_fa = params.ecoli_fa
+        ch_spikein_chro_index = params.ecoli_chro_index ?: null
+        ch_spikein_bowtie2_index = params.ecoli_bowtie2_index ?: null
+        ch_spikein_blacklist = params.ecoli_blacklist ?: Channel.empty()
+    }
 
     // Create indices for chosen aligner if not supplied
     if (params.aligner == 'chromap') {
@@ -343,7 +349,7 @@ workflow {
         ch_experimental_bam_split
             .ip
             .mix(ch_experimental_bam_split.control)
-            .branch { meta, bam ->
+            .branch { meta, _bam ->
                 yes: meta.spikein == "yes"
                 no: meta.spikein == "no"
             }
@@ -352,7 +358,7 @@ workflow {
         ch_spikein_bam_split
             .ip
             .mix(ch_spikein_bam_split.control)
-            .branch { meta, bam ->
+            .branch { meta, _bam ->
                 yes: meta.spikein == "yes"
                 no: meta.spikein == "no"
             }
@@ -382,7 +388,7 @@ workflow {
                 tuple( bam.name, meta, bam ) 
             }
             .join ( scaling_ch )
-            .map { ID, meta, bam, spikein_reads_mapped, scaling_factor -> 
+            .map { _ID, meta, bam, _spikein_reads_mapped, scaling_factor -> 
                 tuple( meta, scaling_factor, bam ) 
             }
             .set { joined }
@@ -528,7 +534,7 @@ workflow {
         macs2_peakcalling
             .out
             .peak
-            .filter { meta, peaks -> peaks.size() > 0 }
+            .filter { _meta, peaks -> peaks.size() > 0 }
             .map { 
                     meta, peak -> 
                         [ meta.antibody, peak ] 
@@ -565,7 +571,7 @@ workflow {
         macs2_peakcalling
             .out
             .peak
-            .filter { meta, peaks -> peaks.size() > 0 }
+            .filter { _meta, peaks -> peaks.size() > 0 }
             .map { 
                     meta, peak -> 
                         [ meta.antibody, peak ] 

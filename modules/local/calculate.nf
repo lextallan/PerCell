@@ -10,6 +10,7 @@ process calculate {
     output:
     path 'scaling_factors.csv', emit: scaled
 
+    script:
     """
     calculate_min_spikein.py ${spikein_count}
     """

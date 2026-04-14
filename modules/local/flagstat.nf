@@ -14,6 +14,7 @@ process flagstat {
     path 'spikein_mapped.csv', emit: spikein_count
     path '*.tsv', emit: stats
 
+    script:
     """
     samtools flagstat ${bam} -O tsv > ${meta.id}.tsv
     grep 'primary mapped' ${meta.id}.tsv | grep -v '%'| cut -f1 | xargs echo "${bam}," > spikein_mapped.csv

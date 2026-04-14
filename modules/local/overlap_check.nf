@@ -14,7 +14,7 @@ process overlap_check {
     output:
     tuple val(meta), path(experimental_bam), emit: experimental_bam
     tuple val(meta), path(spikein_bam), emit: spikein_bam
-    tuple val (meta), env(spikein_used), emit: spikein_status
+    tuple val (meta), env('spikein_used'), emit: spikein_status
     path "overlap_report.csv", emit: overlap_report
 
     script:
@@ -39,8 +39,8 @@ process overlap_check {
     percent_common=\$(awk -v common="\$common" -v total="\$total" 'BEGIN { OFMT="%.4f"; x= common / total; print x}')
     echo "Percent_common: \${percent_common}"
     
-    # if the percent spiked in experimental and spike-in samples is greater than 2% then we consider a spike-in as used; 0 or 1 values passed through channel, then summed to check if every sample has spike-in content
-    if [[ \${percent_spiked} > 0.02 ]]
+    # If the percent spiked in experimental and spike-in samples is greater than 0.5% then we consider a spike-in as used; 0 or 1 values are passed through a channel then summed to check if every sample has spike-in content
+    if [[ \${percent_spiked} > 0.005 ]]
     then
         spikein_used="yes"
     elif  [ $override == true ]
@@ -56,6 +56,8 @@ process overlap_check {
     then
         echo "WARNING: Overriding spike-in status, bams will be downsampled even if very few spike-in reads detected!"
     fi
+
+    export spikein_used
 
     # Collect data for each sample -- write to csv and collect to report to user
     echo "Sample,Experimental_reads,Spikein_reads,Percent_spiked_in,Spikein_used,Common_reads,Percent_common" > overlap_report.csv

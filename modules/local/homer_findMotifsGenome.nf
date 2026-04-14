@@ -15,7 +15,7 @@ process homer_findMotifsGenome {
 
     output:
     path "knownResults.html", emit: known
-    //path "output/homerResults.html", emit: denovo
+    path "output/homerResults.html", emit: denovo
 
     script:
     def args = task.ext.args ?: ''
