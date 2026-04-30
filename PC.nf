@@ -23,6 +23,7 @@ include { downsample } from './modules/local/downsample.nf'
 include { macs2_peakcalling } from './modules/local/macs2_peakcalling.nf'
 include { HOMER_ANNOTATEPEAKS } from './modules/nf-core/modules/homer/annotatepeaks/main.nf'
 include { macs2_bdgcmp } from './modules/local/macs2_bdgcmp.nf'
+include { deeptools_bamCoverage } from './modules/local/deeptools_bamCoverage.nf'
 include { MULTIQC } from './modules/local/multiqc.nf'
 include { homer_findMotifsGenome } from './modules/local/homer_findMotifsGenome.nf'
 include { idr } from './modules/local/idr.nf'
@@ -520,6 +521,19 @@ workflow {
         whitelist_experimental.out.sizes,
         params.macs2_bigwig_method
     )
+
+    // Create individual, smoothed bigWig files if desired
+    if (params.skip_bamCoverage == false) {
+        if (params.skip_downsample == false) {
+            deeptools_bamCoverage (
+                ch_downsampled
+            )
+        } else {
+            deeptools_bamCoverage (
+                ch_deduped_experimental
+            )
+        }
+    }
 
     if (params.skip_motif == false) {
         homer_findMotifsGenome (
