@@ -79,7 +79,7 @@ ________________________________________
 
     --experimental: species identify from which the experimental cells originate, <human,mouse,zebrafish,fly> (default: human)
 
-    --spikein: species identify from which the cells used for spike-in originate, <human,mouse,zebrafish,fly> (default: mouse)
+    --spikein: species identify from which the cells used for spike-in originate, <human,mouse,zebrafish,fly, ecoli> (default: mouse)
 
     --human_fa: path to human reference fasta file, if used as either experimental or spike-in genome
 
@@ -88,6 +88,8 @@ ________________________________________
     --zebrafish_fa: path to zebrafish reference fasta file, if used as if used as either experimental or spike-in genome
 
     --fly_fa: path to fly reference fasta file, if used as if used as either experimental or spike-in genome
+
+    --ecoli_fa: path to ecoli reference fasta file, if used as if used as spike-in genome
 
     --skip_fastqc: choice of whether or not to skip FastQC quality control assessments, <true,false> (default: false)
 
@@ -116,6 +118,8 @@ ________________________________________
     --skip_annotation: whether or not to use HOMER’s ‘annotatePeaks’ tool for annotation of peaks with nearest genes and genomic features <true,false> (default: true)
 
     --skip_motif: whether or not to use HOMER’s ‘findMotifsGenome’ tool to find enriched DNA sequence motifs in called peaks <true,false> (default: true)
+
+    --skip_bamCoverage: whether or not to use deeptools bamCoverage to generate bigwig files for individual IP/control samples for visualization in a genome browser, <true,false> (default: false)
     ```
 
 ________________________________________
@@ -151,9 +155,11 @@ ________________________________________
     |           └── *.metrics.txt
     |-- downsampled
     |   └── *_ds.bam
+    |-- individual_bigwigs
+    |   └── *.bigWig
     |-- macs2_bigwigs
     |   └── <macs2_bigwig_method>
-    |       └── *.bigWig
+    |       └── *_signal.bigWig
     |-- macs2_subcommands
     |   |-- <macs2_cutoff>_cutoff
     |   |   |-- *_subcommands.narrowPeak

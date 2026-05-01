@@ -447,14 +447,14 @@ workflow {
     FASTQC_TRIMGALORE
         .out
         .fastqc_zip
-        .map { meta, metrics -> metrics }
+        .map { _meta, metrics -> metrics }
         .collect()
         .set { ch_FASTQC_metrics }
 
     PICARD_DEDUP_EXPERIMENTAL
         .out
         .metrics
-        .map { meta, metrics -> metrics }
+        .map { _meta, metrics -> metrics }
         .collect()
         .set { ch_experimental_picard_metrics }
 
@@ -462,7 +462,7 @@ workflow {
         BOWTIE2_EXPERIMENTAL
             .out
             .log
-            .map { meta, metrics -> metrics }
+            .map { _meta, metrics -> metrics }
             .collect()
             .set { ch_Bowtie2_Experimental_metrics }
 
@@ -470,7 +470,7 @@ workflow {
             BOWTIE2_SPIKEIN
                 .out
                 .log
-                .map { meta, metrics -> metrics }
+                .map { _meta, metrics -> metrics }
                 .collect()
                 .set { ch_Bowtie2_Spikein_metrics }
         }
