@@ -1,6 +1,6 @@
 process overlap_check {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_high_memory'
 
     conda (params.enable_conda ? "bioconda::samtools=1.16.1" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

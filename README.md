@@ -79,7 +79,7 @@ ________________________________________
 
     --experimental: species identify from which the experimental cells originate, <human,mouse,zebrafish,fly> (default: human)
 
-    --spikein: species identify from which the cells used for spike-in originate, <human,mouse,zebrafish,fly, ecoli> (default: mouse)
+    --spikein: species identify from which the cells used for spike-in originate, <human,mouse,zebrafish,fly,ecoli> (default: mouse)
 
     --human_fa: path to human reference fasta file, if used as either experimental or spike-in genome
 
