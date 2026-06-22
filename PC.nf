@@ -11,8 +11,10 @@ include { generate_whitelist as whitelist_experimental ; generate_whitelist as w
 include { FASTQC_TRIMGALORE } from './modules/local/fastqc_trimgalore.nf'
 include { BOWTIE2_BUILD as BOWTIE2_BUILD_EXPERIMENTAL ; BOWTIE2_BUILD as BOWTIE2_BUILD_SPIKEIN } from './modules/nf-core/modules/bowtie2/build/main.nf'
 include { CHROMAP_INDEX as CHROMAP_INDEX_EXPERIMENTAL ; CHROMAP_INDEX as CHROMAP_INDEX_SPIKEIN } from './modules/nf-core/modules/chromap/index/main.nf'
+include { BOWTIE_BUILD as BOWTIE_BUILD_EXPERIMENTAL ; BOWTIE_BUILD as BOWTIE_BUILD_SPIKEIN } from './modules/nf-core/modules/bowtie/build/main.nf'
 include { CHROMAP_CHROMAP as CHROMAP_EXPERIMENTAL ; CHROMAP_CHROMAP as CHROMAP_SPIKEIN } from './modules/nf-core/modules/chromap/chromap/main.nf'
 include { BOWTIE2_ALIGN as BOWTIE2_EXPERIMENTAL ; BOWTIE2_ALIGN as BOWTIE2_SPIKEIN } from './modules/nf-core/modules/bowtie2/align/main.nf'
+include { BOWTIE_ALIGN as BOWTIE_EXPERIMENTAL ; BOWTIE_ALIGN as BOWTIE_SPIKEIN } from './modules/nf-core/modules/bowtie/align/main.nf'
 include { samtools_whitelist_sort as samtools_experimental ; samtools_whitelist_sort as samtools_spikein } from './modules/local/samtools_whitelist_sort.nf'
 include { PICARD_MERGESAMFILES as PICARD_MERGE_EXPERIMENTAL ; PICARD_MERGESAMFILES as PICARD_MERGE_SPIKEIN } from './modules/nf-core/modules/picard/mergesamfiles/main.nf'
 include { PICARD_MARKDUPLICATES as PICARD_DEDUP_EXPERIMENTAL ; PICARD_MARKDUPLICATES as PICARD_DEDUP_SPIKEIN } from './modules/nf-core/modules/picard/markduplicates/main.nf'
@@ -21,6 +23,8 @@ include { flagstat } from './modules/local/flagstat.nf'
 include { calculate } from './modules/local/calculate.nf'
 include { downsample } from './modules/local/downsample.nf'
 include { macs2_peakcalling } from './modules/local/macs2_peakcalling.nf'
+include { macs1_peakcalling } from './modules/local/macs1_peakcalling.nf'
+include { SAMTOOLS_SORT } from './modules/nf-core/modules/samtools/sort/main.nf'
 include { HOMER_ANNOTATEPEAKS } from './modules/nf-core/modules/homer/annotatepeaks/main.nf'
 include { macs2_bdgcmp } from './modules/local/macs2_bdgcmp.nf'
 include { deeptools_bamCoverage } from './modules/local/deeptools_bamCoverage.nf'
@@ -48,6 +52,7 @@ workflow {
         ch_experimental_fa = params.human_fa
         ch_experimental_chro_index = params.human_chro_index ?: null
         ch_experimental_bowtie2_index = params.human_bowtie2_index ?: null
+        ch_experimental_bowtie_index = params.human_bowtie_index ?: null
         ch_experimental_gtf = params.human_gtf ?: Channel.empty()
         ch_experimental_blacklist = params.human_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_human
@@ -56,6 +61,7 @@ workflow {
         ch_experimental_fa = params.mouse_fa
         ch_experimental_chro_index = params.mouse_chro_index ?: null
         ch_experimental_bowtie2_index = params.mouse_bowtie2_index ?: null
+        ch_experimental_bowtie_index = params.mouse_bowtie_index ?: null
         ch_experimental_gtf = params.mouse_gtf ?: Channel.empty()
         ch_experimental_blacklist = params.mouse_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_mouse
@@ -64,6 +70,7 @@ workflow {
         ch_experimental_fa = params.zebrafish_fa
         ch_experimental_chro_index = params.zebrafish_chro_index ?: null
         ch_experimental_bowtie2_index = params.zebrafish_bowtie2_index ?: null
+        ch_experimental_bowtie_index = params.zebrafish_bowtie_index ?: null
         ch_experimental_gtf = params.zebrafish_gtf ?: Channel.empty()
         ch_experimental_blacklist = params.zebrafish_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_zebrafish
@@ -72,6 +79,7 @@ workflow {
         ch_experimental_fa = params.fly_fa
         ch_experimental_chro_index = params.fly_chro_index ?: null
         ch_experimental_bowtie2_index = params.fly_bowtie2_index ?: null
+        ch_experimental_bowtie_index = params.fly_bowtie_index ?: null
         ch_experimental_gtf = params.fly_gtf ?: Channel.empty()
         ch_experimental_blacklist = params.fly_blacklist ?: Channel.empty()
         ch_macs_gsize = params.macs_gsize_fly
@@ -82,30 +90,35 @@ workflow {
         ch_spikein_fa = params.human_fa
         ch_spikein_chro_index = params.human_chro_index ?: null
         ch_spikein_bowtie2_index = params.human_bowtie2_index ?: null
+        ch_spikein_bowtie_index = params.human_bowtie_index ?: null
         ch_spikein_blacklist = params.human_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'mouse') {
         ch_spikein_fa = params.mouse_fa
         ch_spikein_chro_index = params.mouse_chro_index ?: null
         ch_spikein_bowtie2_index = params.mouse_bowtie2_index ?: null
+        ch_spikein_bowtie_index = params.mouse_bowtie_index ?: null
         ch_spikein_blacklist = params.mouse_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'zebrafish') {
         ch_spikein_fa = params.zebrafish_fa
         ch_spikein_chro_index = params.zebrafish_chro_index ?: null
         ch_spikein_bowtie2_index = params.zebrafish_bowtie2_index ?: null
+        ch_spikein_bowtie_index = params.zebrafish_bowtie_index ?: null
         ch_spikein_blacklist = params.zebrafish_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'fly') {
         ch_spikein_fa = params.fly_fa
         ch_spikein_chro_index = params.fly_chro_index ?: null
         ch_spikein_bowtie2_index = params.fly_bowtie2_index ?: null
+        ch_spikein_bowtie_index = params.fly_bowtie_index ?: null
         ch_spikein_blacklist = params.fly_blacklist ?: Channel.empty()
     }
     if (params.spikein == 'ecoli') {
         ch_spikein_fa = params.ecoli_fa
         ch_spikein_chro_index = params.ecoli_chro_index ?: null
         ch_spikein_bowtie2_index = params.ecoli_bowtie2_index ?: null
+        ch_spikein_bowtie_index = params.ecoli_bowtie_index ?: null
         ch_spikein_blacklist = params.ecoli_blacklist ?: Channel.empty()
     }
 
@@ -138,7 +151,21 @@ workflow {
             ch_spikein_bowtie2_index = BOWTIE2_BUILD_SPIKEIN.out.index
         }
     }
-    
+    if (params.aligner == 'bowtie') {
+        if (ch_experimental_bowtie_index == null) {
+            BOWTIE_BUILD_EXPERIMENTAL (
+                ch_experimental_fa
+            )
+            ch_experimental_bowtie_index = BOWTIE_BUILD_EXPERIMENTAL.out.index
+        }
+        if (params.skip_downsample == false && ch_spikein_bowtie_index == null) {
+            BOWTIE_BUILD_SPIKEIN (
+                ch_spikein_fa
+            )
+            ch_spikein_bowtie_index = BOWTIE_BUILD_SPIKEIN.out.index
+        }
+    }
+
     // Create whitelist for samtools
     whitelist_experimental (
         ch_experimental_fa,
@@ -150,7 +177,7 @@ workflow {
         .whitelist
         .set { ch_whitelist_experimental }
 
-    // Align to experimental genome with either Chromap or Bowtie2
+    // Align to experimental genome with either Chromap, Bowtie2, or Bowtie
     if (params.aligner == 'chromap') {
             CHROMAP_EXPERIMENTAL (
                 FASTQC_TRIMGALORE.out.reads,
@@ -168,6 +195,15 @@ workflow {
             [], []
         )
     ch_aligned_experimental = BOWTIE2_EXPERIMENTAL.out.bam
+    }
+
+    if (params.aligner == 'bowtie') {
+        BOWTIE_EXPERIMENTAL (
+            FASTQC_TRIMGALORE.out.reads,
+            ch_experimental_bowtie_index,
+            []
+        )
+    ch_aligned_experimental = BOWTIE_EXPERIMENTAL.out.bam
     }
 
     samtools_experimental (
@@ -231,6 +267,15 @@ workflow {
                 [], []
             )
         ch_aligned_spikein = BOWTIE2_SPIKEIN.out.bam
+        }
+
+        if (params.aligner == 'bowtie') {
+            BOWTIE_SPIKEIN (
+                FASTQC_TRIMGALORE.out.reads,
+                ch_spikein_bowtie_index,
+                []
+            )
+        ch_aligned_spikein = BOWTIE_SPIKEIN.out.bam
         }
 
         samtools_spikein (
@@ -365,6 +410,13 @@ workflow {
             }
             .set { ch_spikein_bam_spikestatus }
 
+        // Warn user if spike-in samples are not suitable for downsampling based on overlap_check results
+        ch_spikein_bam_spikestatus
+            .no
+            .subscribe {
+                log.warn "To avoid highly skewed/variable scaling, sample ${it[0].id} has not been included for normalization purposes based on its failure to meet the minimum detectable spike-in threshold (currently set at 0.5% of total reads). To override this behavior, set --override_spikeinfail to true."
+            }
+        
         flagstat (
             ch_spikein_bam_spikestatus.yes
         )
@@ -484,6 +536,17 @@ workflow {
         ch_spikein_picard_metrics.ifEmpty([])
     )
 
+    // Optional: Combine downsampled and fullsize bam files, then sort and index with samtools for the user
+    if (params.skip_sort_index == false) {
+        ch_deduped_experimental
+            .mix(ch_downsampled)
+            .set { ch_all_experimental_bam }
+
+        SAMTOOLS_SORT (
+            ch_all_experimental_bam
+        )
+    }
+
     // Create channel combining bam files of an IP with its control for non-downsampled samples
     ch_deduped_experimental
         .combine(ch_deduped_experimental)
@@ -506,6 +569,15 @@ workflow {
         params.macs2_cutoff,
         params.macs2_peak_method
     )
+
+    // Optional: Call peaks using MACS1
+    if (params.skip_macs1 == false) {
+        macs1_peakcalling (
+            ch_ip_control_bam,
+            ch_macs_gsize,
+            params.macs1_pvalue
+        )
+    }
 
     if (params.skip_annotation == false) {
         HOMER_ANNOTATEPEAKS (

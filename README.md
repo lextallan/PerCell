@@ -120,6 +120,12 @@ ________________________________________
     --skip_motif: whether or not to use HOMER’s ‘findMotifsGenome’ tool to find enriched DNA sequence motifs in called peaks <true,false> (default: true)
 
     --skip_bamCoverage: whether or not to use deeptools bamCoverage to generate bigwig files for individual IP/control samples for visualization in a genome browser, <true,false> (default: false)
+
+    --skip_macs1: optional peak calling with MACS1, <true,false> (default: true)
+
+    --macs1_pvalue: p-value cutoff used for calling peaks with MACS1, in standard p-value form (default: 1e-9)
+
+    --skip_sort_index: optional output of sorted and indexed bam files for the user (downsampled bams used for normalized samples; full-size deduplicated bams used for non-normalized samples), <true,false> (default: false)
     ```
 
 ________________________________________
@@ -150,13 +156,19 @@ ________________________________________
     |   |   └── metrics
     |   |       └── *.metrics.txt
     |   └── <spike-in_species>
-    |       |-- *.bam
+    |       |-- *.dd.bam
     |       └── metrics
     |           └── *.metrics.txt
     |-- downsampled
     |   └── *_ds.bam
     |-- individual_bigwigs
     |   └── *.bigWig
+    |-- macs1_peaks
+    |   └── <macs1_pvalue>_pvalue
+    |       |-- peaks
+    |       |   └── *_peaks.bed
+    |       |-- summits
+    |       |   └── *_summits.bed
     |-- macs2_bigwigs
     |   └── <macs2_bigwig_method>
     |       └── *_signal.bigWig
@@ -182,6 +194,9 @@ ________________________________________
     |   └── overlap_report.csv
     |-- scaling
     |   └── scaling_factors.csv
+    |-- sorted_indexed_bam
+    |   |-- *.sorted.bam
+    |   └── *.sorted.bam.bai
     └── trimgalore
         └── *.fq.gz
 ```
