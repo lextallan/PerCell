@@ -237,6 +237,9 @@ workflow {
         PICARD_MERGE_EXPERIMENTAL.out.bam
     )
 
+    // Create empty dowsample channel to avoid potential downstream errors if params.skip_downsample is true
+    ch_downsampled = Channel.empty()
+
     // Spike-in specific steps (skipped if params.skip_downsample is true):
     if (params.skip_downsample != true) {
 
